@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import svc from './Services'
 import './App.css'
 
@@ -129,17 +128,35 @@ const App = () => {
             }, 5000);
           })
           .catch((err) => {
-            setErrorMessage(
-              `Information of ${changedPerson.name} has already been removed from server`
-            );
-            setTimeout(() => {
-              setErrorMessage(null);
-            }, 5000);
-            setPersons(persons.filter((p) => p.id !== id));
-            setNewName("");
-            setNewNumber("");
-          }); setNewName('');
-        setNewNumber('');
+            // setErrorMessage(
+            //   `Information of ${changedPerson.name} has already been removed from server`
+            // );
+            // setTimeout(() => {
+            //   setErrorMessage(null);
+            // }, 5000);
+            // setPersons(persons.filter((p) => p.id !== id));
+            // setNewName("");
+            // setNewNumber("");
+
+            if (err.res.data) {
+              setErrorMessage(err.res.data.error)
+              setTimeout(() => {
+                setErrorMessage(null)
+              }, 5000)
+            } else {
+              setErrorMessage(
+                `Information of ${changedPerson.name} has already been removed from server`
+              )
+              setPersons(persons.filter((p) => p.id !== id))
+              setNewName("")
+              setNewNumber("")
+              setTimeout(() => {
+                setErrorMessage(null)
+              }, 5000)
+            }
+          });
+        setNewName('')
+        setNewNumber('')
         return;
       } else {
         return;
@@ -161,8 +178,12 @@ const App = () => {
       setNewName('');
       setNewNumber('');
     })
-      .catch((err) => alert(err));
-
+      .catch((err) => {
+        setErrorMessage(err.res.data.error)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
 
 
   }
@@ -171,7 +192,8 @@ const App = () => {
     if (window.confirm("Do you really want to delete this person")) {
       svc
         .remove(id)
-        .then((returnedPerson) => {
+        .then(() => {
+          setSuccessMessage(`Deleted ${persons.find((person) => person.id === id).name}`)
           setPersons(persons.filter((person) => person.id !== id));
         })
         .catch((err) => {
